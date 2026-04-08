@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Kudi",
+    "slug": "bankly",
+    "version": "2.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "bankly",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "sdkVersion": "54.0.0",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.bankly.gh"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#060614"
+      },
+      "package": "com.bankly.gh"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "36a39a7e-b91a-46c4-aa1c-122a405b5812"
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #020205;
+  --color-foreground: #ffffff;
+  --color-primary: #6366f1;
+  --color-card: #0a0a0f;
+  --color-border: #1a1a2e;
+}
+
+body {
+  color: var(--color-foreground);
+  background: var(--color-background);
+  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .glass-card {
+    @apply bg-[#0a0a0f]/70 backdrop-blur-xl border border-[#1a1a2e] rounded-2xl shadow-2xl;
+  }
+  
+  .premium-gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400;
+  }
+}
+
