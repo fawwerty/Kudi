@@ -1,0 +1,50 @@
+name: Bankly CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install Web dependencies
+      run: |
+        cd web
+        npm ci
+
+    - name: Build Web Application
+      run: |
+        cd web
+        npm run build
+
+    - name: Install Backend dependencies
+      run: |
+        cd backend
+        npm ci
+
+    - name: Verify Docker Compose
+      run: docker-compose config
+      
+  deploy:
+    needs: test-and-build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Deploy Placeholder
+      run: echo 'Add your VPS or Vercel deployment scripts here'

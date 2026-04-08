@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  db:
+    image: mongo:6-jammy
+    ports:
+      - "27017:27017"
+    volumes:
+      - bankly_mongo_data:/data/db
+    networks:
+      - bankly_network
+
+  ai-backend:
+    build: ./ai-backend
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./ai-backend/data:/app/data
+      - ./ai-backend/models:/app/models
+    networks:
+      - bankly_network
+    restart: unless-stopped
+
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://db:27017/bankly
+      - JWT_SECRET=super_secret_jwt_key_123
+      - AI_API_URL=http://ai-backend:8001
+      - FRONTEND_URL=http://localhost:3000
+    depends_on:
+      - db
+      - ai-backend
+    networks:
+      - bankly_network
+    restart: unless-stopped
+
+  web:
+    build: ./web
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5000/api
+    depends_on:
+      - backend
+    networks:
+      - bankly_network
+    restart: unless-stopped
+
+networks:
+  bankly_network:
+    driver: bridge
+
+volumes:
+  bankly_mongo_data:

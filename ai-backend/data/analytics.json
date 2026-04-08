@@ -1,0 +1,326 @@
+{
+  "stats": {
+    "total_income": 173099.0,
+    "total_expense": 251502.46,
+    "net_savings": -78403.46,
+    "savings_rate_pct": -45.3,
+    "total_transactions": 304,
+    "anomalies_detected": 22
+  },
+  "cashflow": [
+    {
+      "month": "Jan",
+      "income": 22974.0,
+      "expense": 29916.0
+    },
+    {
+      "month": "Feb",
+      "income": 12637.0,
+      "expense": 23807.0
+    },
+    {
+      "month": "Mar",
+      "income": 6840.0,
+      "expense": 16436.0
+    },
+    {
+      "month": "Apr",
+      "income": 22782.0,
+      "expense": 15443.0
+    },
+    {
+      "month": "May",
+      "income": 4296.0,
+      "expense": 15823.0
+    },
+    {
+      "month": "Jun",
+      "income": 13970.0,
+      "expense": 22554.0
+    },
+    {
+      "month": "Jul",
+      "income": 19354.0,
+      "expense": 27716.0
+    },
+    {
+      "month": "Aug",
+      "income": 6655.0,
+      "expense": 22934.0
+    },
+    {
+      "month": "Sep",
+      "income": 19948.0,
+      "expense": 19384.0
+    },
+    {
+      "month": "Oct",
+      "income": 12974.0,
+      "expense": 22984.0
+    },
+    {
+      "month": "Nov",
+      "income": 24139.0,
+      "expense": 23566.0
+    },
+    {
+      "month": "Dec",
+      "income": 6530.0,
+      "expense": 10939.0
+    }
+  ],
+  "categories": [
+    {
+      "name": "Travel",
+      "value": 40314
+    },
+    {
+      "name": "Entertainment",
+      "value": 37801
+    },
+    {
+      "name": "Salary",
+      "value": 36518
+    },
+    {
+      "name": "Food & Drink",
+      "value": 33094
+    },
+    {
+      "name": "Health & Fitness",
+      "value": 30198
+    },
+    {
+      "name": "Rent",
+      "value": 25344
+    },
+    {
+      "name": "Utilities",
+      "value": 25075
+    },
+    {
+      "name": "Shopping",
+      "value": 23154
+    }
+  ],
+  "recent_transactions": [
+    {
+      "date": "Dec 29, 2024",
+      "desc": "Pressure activity defense detail.",
+      "category": "Other",
+      "amount": 1480.0,
+      "type": "income",
+      "flagged": false
+    },
+    {
+      "date": "Dec 29, 2024",
+      "desc": "Discussion black follow.",
+      "category": "Shopping",
+      "amount": 655.78,
+      "type": "expense",
+      "flagged": false
+    },
+    {
+      "date": "Dec 28, 2024",
+      "desc": "No couple debate must.",
+      "category": "Investment",
+      "amount": 1425.0,
+      "type": "income",
+      "flagged": false
+    },
+    {
+      "date": "Dec 28, 2024",
+      "desc": "Right analysis mention.",
+      "category": "Entertainment",
+      "amount": 727.25,
+      "type": "expense",
+      "flagged": false
+    },
+    {
+      "date": "Dec 28, 2024",
+      "desc": "Quite as when.",
+      "category": "Rent",
+      "amount": 514.09,
+      "type": "expense",
+      "flagged": false
+    },
+    {
+      "date": "Dec 23, 2024",
+      "desc": "Instead writer.",
+      "category": "Health & Fitness",
+      "amount": 325.64,
+      "type": "expense",
+      "flagged": false
+    },
+    {
+      "date": "Dec 21, 2024",
+      "desc": "Up hear draw.",
+      "category": "Salary",
+      "amount": 784.35,
+      "type": "expense",
+      "flagged": false
+    },
+    {
+      "date": "Dec 19, 2024",
+      "desc": "Democratic recent student specific politic",
+      "category": "Food & Drink",
+      "amount": 406.37,
+      "type": "expense",
+      "flagged": false
+    },
+    {
+      "date": "Dec 19, 2024",
+      "desc": "Real know our any.",
+      "category": "Rent",
+      "amount": 1047.07,
+      "type": "expense",
+      "flagged": false
+    },
+    {
+      "date": "Dec 16, 2024",
+      "desc": "Child group describe.",
+      "category": "Shopping",
+      "amount": 1544.74,
+      "type": "expense",
+      "flagged": false
+    }
+  ],
+  "budget": [
+    {
+      "category": "Alcohol & Bars",
+      "budget": 50
+    },
+    {
+      "category": "Auto Insurance",
+      "budget": 75
+    },
+    {
+      "category": "Coffee Shops",
+      "budget": 15
+    },
+    {
+      "category": "Electronics & Software",
+      "budget": 0
+    },
+    {
+      "category": "Entertainment",
+      "budget": 25
+    },
+    {
+      "category": "Fast Food",
+      "budget": 15
+    },
+    {
+      "category": "Gas & Fuel",
+      "budget": 75
+    },
+    {
+      "category": "Groceries",
+      "budget": 150
+    },
+    {
+      "category": "Haircut",
+      "budget": 30
+    },
+    {
+      "category": "Home Improvement",
+      "budget": 250
+    },
+    {
+      "category": "Internet",
+      "budget": 75
+    },
+    {
+      "category": "Mobile Phone",
+      "budget": 65
+    },
+    {
+      "category": "Mortgage & Rent",
+      "budget": 1100
+    },
+    {
+      "category": "Movies & DVDs",
+      "budget": 0
+    },
+    {
+      "category": "Music",
+      "budget": 11
+    },
+    {
+      "category": "Restaurants",
+      "budget": 150
+    },
+    {
+      "category": "Shopping",
+      "budget": 100
+    },
+    {
+      "category": "Television",
+      "budget": 15
+    },
+    {
+      "category": "Utilities",
+      "budget": 150
+    }
+  ],
+  "model_metrics": {
+    "fraud_auc": 0.9964,
+    "advisor_accuracy": 1.0,
+    "fraud_model": "GradientBoostingClassifier",
+    "advisor_model": "RandomForestClassifier",
+    "trained_on": "1500 transactions (2020-2024)",
+    "features": [
+      "Amount",
+      "cat_enc",
+      "type_enc",
+      "DayOfWeek",
+      "DayOfMonth",
+      "MonthNum",
+      "cat_mean",
+      "cat_std"
+    ]
+  },
+  "category_stats": {
+    "Entertainment": {
+      "mean": 1036.12,
+      "std": 559.55
+    },
+    "Food & Drink": {
+      "mean": 1070.43,
+      "std": 600.05
+    },
+    "Health & Fitness": {
+      "mean": 955.22,
+      "std": 588.3
+    },
+    "Investment": {
+      "mean": 2558.11,
+      "std": 1277.71
+    },
+    "Other": {
+      "mean": 2726.73,
+      "std": 1244.02
+    },
+    "Rent": {
+      "mean": 982.28,
+      "std": 548.04
+    },
+    "Salary": {
+      "mean": 1020.91,
+      "std": 593.11
+    },
+    "Shopping": {
+      "mean": 979.21,
+      "std": 552.48
+    },
+    "Travel": {
+      "mean": 1059.36,
+      "std": 546.56
+    },
+    "Utilities": {
+      "mean": 935.25,
+      "std": 582.77
+    }
+  },
+  "generated_at": "2026-03-25T13:32:03.348450"
+}
