@@ -22,7 +22,7 @@ Since your local MongoDB won't work on the internet, you need a cloud database.
    - **Build Command**: `npm install`
    - **Start Command**: `npm start`
 5. Add these **Environment Variables**:
-   - `MONGO_URI`: (mongodb+srv://fawwerty:<20303400Ge2re2>@cluster0.ytzeqk9.mongodb.net/?appName=Cluster0)
+   - `MONGO_URI`: (real url)
    - `JWT_SECRET`: (Any random long string)
    - `FRONTEND_URL`: `https://your-app.vercel.app` (You'll get this in the next step)
 6. Click **Deploy**. Copy your new URL (e.g., `https://bankly-api.onrender.com`).
