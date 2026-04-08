@@ -42,7 +42,7 @@ jobs:
         npm ci
 
     - name: Verify Docker Compose
-      run: docker-compose config
+      run: docker compose config
       
   deploy:
     needs: test-and-build
