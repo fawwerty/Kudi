@@ -21,6 +21,9 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
+        cache-dependency-path: |
+          web/package-lock.json
+          backend/package-lock.json
 
     - name: Install Web dependencies
       run: |
