@@ -45,12 +45,12 @@ export default function Home() {
         <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-[#6366f1] opacity-[0.12] blur-[150px] rounded-full pointer-events-none z-10" />
         <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-[#a855f7] opacity-[0.12] blur-[150px] rounded-full pointer-events-none z-10" />
 
-        <main className="relative pt-24 pb-32 max-w-5xl mx-auto flex flex-col items-center z-20">
+        <main className="relative pt-24 pb-32 w-full max-w-5xl mx-auto flex flex-col items-center z-20 px-4 sm:px-0">
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="text-6xl md:text-8xl font-bold tracking-tighter mb-8 leading-[1.05] premium-gradient-text"
+            className="text-4xl md:text-8xl font-bold tracking-tighter mb-8 leading-[1.1] premium-gradient-text px-2"
           >
             Finance, elegantly <br className="hidden md:block" /> engineered.
           </motion.h1>
@@ -68,12 +68,12 @@ export default function Home() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.25 }}
-            className="flex flex-col sm:flex-row gap-4 w-full justify-center"
+            className="flex flex-col sm:flex-row gap-4 w-full max-w-md sm:max-w-none justify-center px-4"
           >
-            <Link href="/register" className="flex items-center justify-center gap-2 px-8 py-4 text-base font-semibold bg-white text-black hover:bg-gray-200 hover:scale-105 active:scale-95 transition-all rounded-full shadow-[0_0_40px_rgba(255,255,255,0.3)]">
+            <Link href="/register" className="flex items-center justify-center gap-2 px-6 py-4 text-base font-semibold bg-white text-black hover:bg-gray-200 hover:scale-105 active:scale-95 transition-all rounded-full shadow-[0_0_40px_rgba(255,255,255,0.3)]">
               Open an account <ArrowRight size={18} />
             </Link>
-            <Link href="/login" className="flex items-center justify-center px-8 py-4 text-base font-semibold bg-white/5 border border-white/10 hover:bg-white/10 hover:scale-105 active:scale-95 transition-all rounded-full backdrop-blur-md">
+            <Link href="/login" className="flex items-center justify-center px-6 py-4 text-base font-semibold bg-white/5 border border-white/10 hover:bg-white/10 hover:scale-105 active:scale-95 transition-all rounded-full backdrop-blur-md">
               Sign in to your account
             </Link>
           </motion.div>
