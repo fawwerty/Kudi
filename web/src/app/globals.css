@@ -8,11 +8,15 @@
   --color-border: #1a1a2e;
 }
 
+html,
 body {
+  height: 100%;
   color: var(--color-foreground);
   background: var(--color-background);
   font-family: Arial, Helvetica, sans-serif;
   overflow-x: hidden;
+  /* Support for modern viewport units */
+  min-height: 100dvh;
 }
 
 @layer utilities {

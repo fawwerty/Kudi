@@ -7,7 +7,7 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen bg-[#020205] overflow-hidden text-white">
+    <div className="relative min-h-[100dvh] bg-[#020205] overflow-hidden text-white w-full">
 
       {/* Navigation */}
       <nav className="absolute top-0 w-full p-8 flex justify-between items-center z-50">
@@ -33,7 +33,7 @@ export default function Home() {
       </nav>
 
       {/* ─── HERO SECTION with background image ─── */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-8 overflow-hidden">
+      <section className="relative min-h-[100dvh] flex flex-col items-center justify-center text-center px-8 overflow-hidden w-full">
         {/* Background image */}
         <div className="absolute inset-0 z-0">
           <Image src="/kudi_hero_bg.png" alt="Kudi Hero Background" fill sizes="100vw" className="object-cover opacity-40" priority />

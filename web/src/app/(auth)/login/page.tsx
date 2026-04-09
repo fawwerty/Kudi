@@ -41,7 +41,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen text-white flex overflow-hidden">
+    <div className="min-h-[100dvh] text-white flex overflow-hidden w-full">
       {/* Left panel — background image */}
       <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-center items-center p-16 overflow-hidden">
         <Image src="/kudi_hero_bg.png" alt="Kudi background" fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover opacity-50" />
