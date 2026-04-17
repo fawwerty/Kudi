@@ -170,7 +170,7 @@ export default function MobileMoneyScreen() {
           <TouchableOpacity style={[s.btn,loading&&{opacity:.6}]} onPress={()=>processPayment("Deposit")} disabled={loading}>
             {loading?<ActivityIndicator color="#fff" size="small"/>:<Text style={s.btnTxt}>Secure Paystack Deposit →</Text>}
           </TouchableOpacity>
-        </div>
+        </View>
       )}
 
       {/* Withdraw */}

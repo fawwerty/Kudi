@@ -75,7 +75,10 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}): Pro
 
   if (!response.ok) {
     // Return early for 401s without throwing to keep console clean
-    if (response.status === 401) return null;
+    if (response.status === 401) {
+      console.warn("Unauthorized API call to:", endpoint);
+      return null;
+    }
 
     let errorMsg = "API request failed";
     try {
@@ -87,4 +90,3 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}): Pro
 
   return response.json();
 }
-

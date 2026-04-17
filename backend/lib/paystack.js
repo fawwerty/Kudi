@@ -1,15 +1,21 @@
 const axios = require("axios");
 
-const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY;
+// Removed fixed assignment to allow dynamic loading from process.env
 const BASE_URL = "https://api.paystack.co";
 
-const paystack = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    Authorization: `Bearer ${PAYSTACK_SECRET}`,
-    "Content-Type": "application/json",
-  },
-});
+const getPaystackClient = () => {
+  const secret = process.env.PAYSTACK_SECRET_KEY;
+  if (!secret) {
+    console.warn("⚠️ PAYSTACK_SECRET_KEY is missing from environment variables.");
+  }
+  return axios.create({
+    baseURL: BASE_URL,
+    headers: {
+      Authorization: `Bearer ${secret}`,
+      "Content-Type": "application/json",
+    },
+  });
+};
 
 module.exports = {
   /**
@@ -17,7 +23,8 @@ module.exports = {
    */
   async getBanks() {
     try {
-      const response = await paystack.get("/bank?country=ghana");
+      const client = getPaystackClient();
+      const response = await client.get("/bank?country=ghana");
       return response.data.data; // List of banks
     } catch (error) {
       console.error("Paystack getBanks error:", error.response?.data || error.message);
@@ -30,16 +37,19 @@ module.exports = {
    */
   async initializeTransaction(email, amount, metadata = {}) {
     try {
-      const response = await paystack.post("/transaction/initialize", {
+      if (!email) throw new Error("Email is required for Paystack initialization.");
+      const client = getPaystackClient();
+      const response = await client.post("/transaction/initialize", {
         email,
-        amount: amount * 100, // Convert to pesewas/kobo
+        amount: Math.round(amount * 100), // Ensure integer (pesewas/kobo)
         currency: "GHS",
         metadata,
       });
       return response.data.data; // { authorization_url, access_code, reference }
     } catch (error) {
-      console.error("Paystack initialize error:", error.response?.data || error.message);
-      throw new Error("Failed to initialize transaction.");
+      const errorData = error.response?.data;
+      console.error("Paystack initialize error:", errorData || error.message);
+      throw new Error(errorData?.message || "Failed to initialize transaction.");
     }
   },
 
@@ -48,7 +58,8 @@ module.exports = {
    */
   async verifyTransaction(reference) {
     try {
-      const response = await paystack.get(`/transaction/verify/${reference}`);
+      const client = getPaystackClient();
+      const response = await client.get(`/transaction/verify/${reference}`);
       return response.data.data;
     } catch (error) {
       console.error("Paystack verify error:", error.response?.data || error.message);
@@ -62,7 +73,8 @@ module.exports = {
   async createTransferRecipient(name, accountNumber, bankCode, type = "ghipss") {
     try {
       // type: 'ghipss' for bank accounts, 'mobile_money' for MoMo in Ghana
-      const response = await paystack.post("/transferrecipient", {
+      const client = getPaystackClient();
+      const response = await client.post("/transferrecipient", {
         type,
         name,
         account_number: accountNumber,
@@ -81,9 +93,10 @@ module.exports = {
    */
   async initiateTransfer(amount, recipientCode, reason = "Withdrawal") {
     try {
-      const response = await paystack.post("/transfer", {
+      const client = getPaystackClient();
+      const response = await client.post("/transfer", {
         source: "balance",
-        amount: amount * 100,
+        amount: Math.round(amount * 100),
         recipient: recipientCode,
         reason,
         currency: "GHS",

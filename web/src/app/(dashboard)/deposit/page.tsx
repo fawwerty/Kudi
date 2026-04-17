@@ -25,18 +25,22 @@ export default function DepositPage() {
         body: JSON.stringify({ amount, description: `Deposit via ${method.toUpperCase()}` })
       });
       
-      if (res.checkoutUrl) {
+      if (res && res.checkoutUrl) {
         setCheckoutUrl(res.checkoutUrl);
         setState("redirect");
-        // Open in new tab or redirect
+        // Open in same tab for better reliability on desktop
         window.location.href = res.checkoutUrl;
+      } else if (!res) {
+        setError("Your session has expired. Please log in again.");
+        setState("idle");
       } else {
         await refreshUser();
         setState("success");
         setTimeout(() => {setState("idle"); setAmount("");}, 3000);
       }
     } catch (err: any) {
-      setError(err.message);
+      console.error("Deposit error:", err);
+      setError(err.message || "Failed to initialize deposit.");
       setState("idle");
     }
   };
