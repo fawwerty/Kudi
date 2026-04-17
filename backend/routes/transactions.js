@@ -1,11 +1,15 @@
+const mongoose = require("mongoose");
 const express  = require("express");
 const axios    = require("axios");
+const { v4: uuidv4 } = require("uuid");
 const router   = express.Router();
 const requireAuth = require("../middleware/requireAuth");
 const Account = require("../models/Account");
 const Transaction = require("../models/Transaction");
+const LedgerEntry = require("../models/LedgerEntry");
 const User = require("../models/User");
 const paystack = require("../lib/paystack");
+const { recordTransfer } = require("../utils/ledgerHelper");
 
 const AI_URL = () => process.env.AI_API_URL || "http://localhost:8001";
 
@@ -88,12 +92,12 @@ router.post("/deposit", requireAuth, async (req, res) => {
       type: "deposit"
     });
 
-    // Create a "pending" transaction record
+    // Create a "pending" transaction record (No ledger entry yet for deposit)
     const tx = new Transaction({
       userId: req.userId,
-      type: "income",
+      type: "DEPOSIT",
       category: "Deposit",
-      description: `Pending: ${description}`,
+      description: `PENDING: ${description}`,
       amount: amt,
       status: "pending",
       reference: payData.reference
@@ -126,19 +130,40 @@ router.get("/verify/:reference", requireAuth, async (req, res) => {
     const payData = await paystack.verifyTransaction(reference);
     
     if (payData.status === "success") {
-      // Atomic balance update
-      const account = await Account.findOneAndUpdate(
-        { userId: tx.userId },
-        { $inc: { balance: tx.amount } },
-        { new: true }
-      );
+      const session = await mongoose.startSession();
+      session.startTransaction();
+      try {
+        const account = await Account.findOne({ userId: tx.userId }).session(session);
+        const balanceBefore = account.balance;
+        account.balance += tx.amount;
+        const balanceAfter = account.balance;
+        await account.save({ session });
 
-      tx.status = "completed";
-      tx.balance = account.balance;
-      tx.description = tx.description.replace("Pending: ", "");
-      await tx.save();
+        tx.status = "completed";
+        tx.description = tx.description.replace("PENDING: ", "");
+        await tx.save({ session });
 
-      return res.json({ status: "success", newBalance: account.balance, transaction: tx });
+        // Ledger Entry for Deposit
+        await new LedgerEntry({
+          transactionId: tx._id,
+          walletId: account._id,
+          type: 'CREDIT',
+          amount: tx.amount,
+          balanceBefore,
+          balanceAfter,
+          description: `Deposit via Paystack: ${tx.description}`,
+          entryGroup: uuidv4()
+        }).save({ session });
+
+        await session.commitTransaction();
+        session.endSession();
+
+        return res.json({ status: "success", newBalance: account.balance, transaction: tx });
+      } catch (err) {
+        await session.abortTransaction();
+        session.endSession();
+        throw err;
+      }
     }
 
     res.json({ status: payData.status, message: "Transaction not successful yet." });
@@ -147,28 +172,28 @@ router.get("/verify/:reference", requireAuth, async (req, res) => {
   }
 });
 
-/**
- * WITHDRAW (Real-time Paystack Transfer)
- */
 router.post("/withdraw", requireAuth, async (req, res) => {
-  try {
-    const { amount, bankCode, accountNumber, accountName, description = "Withdrawal" } = req.body;
-    const amt = parseFloat(amount);
-    
-    if (!amt || amt <= 0) return res.status(400).json({ error: "Amount must be greater than 0." });
-    if (!bankCode || !accountNumber) return res.status(400).json({ error: "Bank and Account Number are required." });
-
-    // 1. Debit local account first (Atomic)
-    const account = await Account.findOneAndUpdate(
-      { userId: req.userId, balance: { $gte: amt } },
-      { $inc: { balance: -amt } },
-      { new: true }
-    );
-
-    if (!account) return res.status(400).json({ error: "Insufficient funds or account not found." });
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
     try {
-      // 2. Create Paystack Recipient
+      const { amount, bankCode, accountNumber, accountName, description = "Withdrawal" } = req.body;
+      const amt = parseFloat(amount);
+      if (!amt || amt <= 0) return res.status(400).json({ error: "Amount must be greater than 0." });
+
+      // 1. Debit local account and update Ledger
+      const tx = await recordTransfer({
+        senderId: req.userId,
+        amount: amt,
+        type: "WITHDRAWAL",
+        reference: `WD-${uuidv4().split('-')[0]}`,
+        description: `PENDING Withdrawal to ${accountNumber}`,
+        session
+      });
+      tx.status = "processing";
+      await tx.save({ session });
+
+      // 2. Prep Paystack
       const recipient = await paystack.createTransferRecipient(
         accountName || "User Withdrawal",
         accountNumber,
@@ -177,104 +202,63 @@ router.post("/withdraw", requireAuth, async (req, res) => {
 
       // 3. Initiate Transfer
       const transfer = await paystack.initiateTransfer(amt, recipient.recipient_code, description);
+      tx.paystackReference = transfer.reference;
+      tx.reference = transfer.reference; // Use Paystack reference for tracking
+      await tx.save({ session });
 
-      const tx = new Transaction({
-        userId: req.userId,
-        accountId: account._id,
-        type: "expense",
-        category: "Withdrawal",
-        description: `${description} to ${accountNumber}`,
-        amount: -amt,
-        balance: account.balance,
-        status: "completed", // Or "processing" if you want to handle webhooks
-        reference: transfer.reference
-      });
-      await tx.save();
+      await session.commitTransaction();
+      session.endSession();
 
-      res.status(201).json({ transaction: tx, newBalance: account.balance });
-    } catch (payErr) {
-      // Rollback on failure
-      await Account.updateOne({ userId: req.userId }, { $inc: { balance: amt } });
-      res.status(422).json({ error: payErr.message || "Paystack transfer failed. Funds rollbacked." });
+      res.status(201).json({ transaction: tx });
+    } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
+      console.error("Withdrawal error:", err);
+      res.status(422).json({ error: err.message || "Withdrawal failed." });
     }
-  } catch (err) {
-    res.status(500).json({ error: "Withdrawal failed." });
-  }
 });
 
 router.post("/transfer", requireAuth, async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
-    const { recipientEmail, recipientPhone, amount, description = "Transfer", note } = req.body;
+    const { recipientEmail, recipientPhone, amount, note } = req.body;
     const amt = parseFloat(amount);
     if (!amt || amt <= 0) return res.status(400).json({ error: "Amount must be greater than 0." });
-    if (!recipientEmail && !recipientPhone) return res.status(400).json({ error: "Recipient (Email or Phone) is required." });
-
-    const senderAccount = await Account.findOneAndUpdate(
-      { userId: req.userId, balance: { $gte: amt } },
-      { $inc: { balance: -amt } },
-      { new: true }
-    );
-
-    if (!senderAccount) {
-       const existingAccount = await Account.findOne({ userId: req.userId });
-       if (!existingAccount) return res.status(404).json({ error: "Sender account not found." });
-       return res.status(400).json({ error: "Insufficient funds." });
-    }
-
-    const fr = await fraudCheck(amt, "Transfer", "Expense");
-    if (fr.risk_level === "HIGH") {
-      await Account.updateOne({ userId: req.userId }, { $inc: { balance: amt } });
-      return res.status(422).json({ error: "Transfer blocked by fraud detection. Funds rollbacked.", fraudScore: fr.fraud_score });
-    }
-
-    const sender = await User.findById(req.userId);
-    const desc = `${note ? note + " — " : ""}Transfer to ${recipientEmail || recipientPhone}`;
-
-    const tx = new Transaction({
-      userId: req.userId,
-      accountId: senderAccount._id,
-      type: "expense",
-      category: "Transfer",
-      description: desc,
-      amount: -amt,
-      balance: senderAccount.balance,
-      status: "completed"
-    });
-    await tx.save();
+    if (!recipientEmail && !recipientPhone) return res.status(400).json({ error: "Recipient is required." });
 
     const recipient = recipientEmail 
-      ? await User.findOne({ email: recipientEmail.toLowerCase() })
-      : await User.findOne({ phone: recipientPhone });
+      ? await User.findOne({ email: recipientEmail.toLowerCase() }).session(session)
+      : await User.findOne({ phone: recipientPhone }).session(session);
     
-    if (recipient && recipient._id.toString() === req.userId) {
-       await Account.updateOne({ userId: req.userId }, { $inc: { balance: amt } });
-       return res.status(400).json({ error: "Cannot transfer funds to your own primary account." });
-    }
+    if (!recipient) throw new Error("Recipient not found in Kudi system.");
+    if (recipient._id.toString() === req.userId) throw new Error("Cannot transfer to yourself.");
 
-    if (recipient) {
-      const recipientAcct = await Account.findOneAndUpdate(
-        { userId: recipient._id },
-        { $inc: { balance: amt } },
-        { new: true }
-      );
+    const sender = await User.findById(req.userId).session(session);
 
-      if (recipientAcct) {
-        await new Transaction({
-          userId: recipient._id,
-          accountId: recipientAcct._id,
-          type: "income",
-          category: "Transfer",
-          description: `Transfer from ${sender?.email || "Kudi User"}`,
-          amount: amt,
-          balance: recipientAcct.balance,
-          status: "completed"
-        }).save();
-      }
-    }
+    // AI Fraud Check
+    const fr = await fraudCheck(amt, "Transfer", "Expense");
+    if (fr.risk_level === "HIGH") throw new Error("Transfer blocked: High risk detected.");
 
-    res.status(201).json({ transaction: tx, newBalance: senderAccount.balance, fraudCheck: fr });
+    const tx = await recordTransfer({
+      senderId: req.userId,
+      recipientId: recipient._id,
+      amount: amt,
+      type: "TRANSFER",
+      reference: `XFER-${uuidv4().split('-')[0]}`,
+      description: `${note ? note + " — " : ""}To ${recipient.email || recipient.phone}`,
+      session
+    });
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(201).json({ transaction: tx, fraudCheck: fr });
   } catch (err) {
-    res.status(500).json({ error: "Transfer failed." });
+    await session.abortTransaction();
+    session.endSession();
+    res.status(400).json({ error: err.message || "Transfer failed." });
   }
 });
 
@@ -296,9 +280,9 @@ router.post("/momo/deposit", requireAuth, async (req, res) => {
 
     await new Transaction({
       userId: req.userId,
-      type: "income",
+      type: "DEPOSIT",
       category: "Mobile Money",
-      description: `Pending: ${provider.toUpperCase()} MoMo Deposit`,
+      description: `PENDING: ${provider.toUpperCase()} MoMo Deposit`,
       amount: amt,
       status: "pending",
       reference: payData.reference
@@ -311,34 +295,30 @@ router.post("/momo/deposit", requireAuth, async (req, res) => {
 });
 
 router.post("/bill-pay", requireAuth, async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
     const { amount, billType, reference, provider } = req.body;
     const amt = parseFloat(amount);
     if (!amt || amt <= 0) return res.status(400).json({ error: "Amount must be greater than 0." });
 
-    const account = await Account.findOneAndUpdate(
-      { userId: req.userId, balance: { $gte: amt } },
-      { $inc: { balance: -amt } },
-      { new: true }
-    );
-
-    if (!account) return res.status(400).json({ error: "Insufficient funds or account not found." });
-    
-    const tx = new Transaction({
-      userId: req.userId,
-      accountId: account._id,
-      type: "expense",
-      category: "Utilities",
-      description: `Bill Payment — ${billType} (Ref: ${reference})`,
-      amount: -amt,
-      balance: account.balance,
-      status: "completed"
+    const tx = await recordTransfer({
+      senderId: req.userId,
+      amount: amt,
+      type: "BILL_PAY",
+      reference: `BILL-${uuidv4().split('-')[0]}`,
+      description: `${billType} Payment (Ref: ${reference})`,
+      session
     });
-    await tx.save();
+
+    await session.commitTransaction();
+    session.endSession();
     
-    res.status(201).json({ transaction: tx, newBalance: account.balance, message:`${billType} bill paid successfully` });
+    res.status(201).json({ transaction: tx, message: `${billType} bill paid successfully` });
   } catch (err) {
-    res.status(500).json({ error: "Bill payment failed." });
+    await session.abortTransaction();
+    session.endSession();
+    res.status(400).json({ error: err.message || "Bill payment failed." });
   }
 });
 

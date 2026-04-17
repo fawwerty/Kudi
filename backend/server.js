@@ -35,6 +35,7 @@ app.use("/api/auth",         require("./routes/google-auth"));
 app.use("/api/accounts",     require("./routes/accounts"));
 app.use("/api/transactions", require("./routes/transactions"));
 app.use("/api/admin",        require("./routes/admin"));
+app.use("/api/webhooks",     require("./routes/webhooks"));
 
 const requireAuth = require("./middleware/requireAuth");
 const AI_URL = () => process.env.AI_API_URL || "http://localhost:8001";
@@ -59,11 +60,7 @@ app.post("/api/ai/advisor/categorize", requireAuth, proxyAI("POST", "/advisor/ca
 app.post("/api/ai/advisor/analyze",    requireAuth, proxyAI("POST", "/advisor/analyze"));
 app.get ("/api/ai/health",                          proxyAI("GET",  "/health"));
 
-app.post("/api/webhooks/paystack", express.raw({type:"application/json"}), (req, res) => {
-  const event = JSON.parse(req.body);
-  console.log("Paystack event:", event.event);
-  res.sendStatus(200);
-});
+// Combined with route registration above
 
 app.get("/health", (_, res) => res.json({ status:"healthy", version:"2.0.0", timestamp:new Date().toISOString() }));
 app.get("/",       (_, res) => res.json({ service:"Kudi API", version:"2.0.0" }));
