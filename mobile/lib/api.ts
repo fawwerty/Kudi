@@ -3,15 +3,17 @@ import { Platform } from "react-native";
 
 // For physical devices, use your machine's local IP (detected as 172.20.10.4)
 // For Android emulator, use 10.0.2.2. For iOS emulator, use localhost.
-const LOCAL_IP = "172.20.10.4"; // Your machine's local IP
+const LOCAL_IP = "172.20.10.4"; // CURRENT LOCAL IP
 const PROD_URL = "https://kudi-p2wf.onrender.com/api";
 
 let isRefreshing = false;
 
 const getBaseUrl = () => {
-  return __DEV__ 
-    ? (Platform.OS === "android" ? `http://${LOCAL_IP}:5000/api` : `http://localhost:5000/api`)
-    : PROD_URL;
+  if (__DEV__) {
+    if (Platform.OS === "android") return `http://${LOCAL_IP}:5000/api`;
+    return `http://localhost:5000/api`;
+  }
+  return PROD_URL;
 };
 
 export const API_BASE_URL = getBaseUrl();

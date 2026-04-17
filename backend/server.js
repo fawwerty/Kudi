@@ -72,7 +72,20 @@ app.use((err, req, res, next) => { console.error(err); res.status(500).json({ er
 require("./config/db")();
 
 app.listen(PORT, () => {
+  const os = require("os");
+  const nets = os.networkInterfaces();
+  let localIp = "localhost";
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      if (net.family === "IPv4" && !net.internal) {
+        localIp = net.address;
+        break;
+      }
+    }
+  }
+
   console.log(`\n🏦  Kudi API   →  http://localhost:${PORT}`);
+  console.log(`📡  Local IP   →  http://${localIp}:${PORT}`);
   console.log(`🤖  AI endpoint  →  ${process.env.AI_API_URL||"http://localhost:8001"}`);
   console.log(`🌍  Env          →  ${process.env.NODE_ENV||"development"}\n`);
 });
