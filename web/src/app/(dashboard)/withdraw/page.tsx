@@ -29,7 +29,7 @@ export default function WithdrawPage() {
     loadBanks();
   }, []);
 
-  const filteredBanks = bankList.filter(b => 
+  const filteredBanks = (bankList || []).filter(b => 
     b.name.toLowerCase().includes(bankQuery.toLowerCase())
   ).slice(0, 5);
 

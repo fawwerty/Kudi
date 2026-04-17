@@ -110,7 +110,7 @@ export default function MobileMoneyScreen() {
     }
   };
 
-  const filteredBanks = bankList.filter(b => b.name.toLowerCase().includes(bankQuery.toLowerCase())).slice(0, 5);
+  const filteredBanks = (bankList || []).filter(b => b.name.toLowerCase().includes(bankQuery.toLowerCase())).slice(0, 5);
 
   const TABS: {id:Tab; label:string; icon:string}[] = [
     {id:"deposit",  label:"Deposit",  icon:"download-outline"},
