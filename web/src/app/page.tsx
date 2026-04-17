@@ -1,36 +1,75 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowRight, ShieldCheck, Zap, Activity, Lock, Eye, Globe, CheckCircle2, Star } from "lucide-react";
+import { ArrowRight, ShieldCheck, Zap, Activity, Lock, Eye, Globe, CheckCircle2, Star, Menu, X } from "lucide-react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function Home() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className="relative min-h-[100dvh] bg-[#020205] overflow-hidden text-white w-full">
 
       {/* Navigation */}
-      <nav className="absolute top-0 w-full p-8 flex justify-between items-center z-50">
+      <nav className="absolute top-0 w-full p-6 sm:p-8 flex justify-between items-center z-[60]">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-tr from-[#6366f1] to-[#8b5cf6] rounded-xl flex items-center justify-center font-bold text-xl shadow-[0_0_20px_rgba(99,102,241,0.4)]">
             ₵
           </div>
           <span className="font-bold text-xl tracking-tight">Kudi</span>
         </div>
+        
+        {/* Desktop Links */}
         <div className="hidden md:flex gap-8 text-sm font-medium text-gray-400">
           <Link href="#features" className="hover:text-white transition-colors">Features</Link>
           <Link href="#security" className="hover:text-white transition-colors">Security</Link>
           <Link href="#pricing" className="hover:text-white transition-colors">Pricing</Link>
         </div>
-        <div className="flex gap-4">
-          <Link href="/login" className="px-5 py-2.5 text-sm font-medium hover:bg-white/5 rounded-full transition-colors">
-            Sign in
-          </Link>
-          <Link href="/register" className="px-5 py-2.5 text-sm font-medium bg-white text-black hover:bg-gray-200 rounded-full transition-colors">
-            Get Started
-          </Link>
+
+        {/* Desktop Buttons & Mobile Toggle */}
+        <div className="flex items-center gap-4">
+          <div className="hidden sm:flex gap-4">
+            <Link href="/login" className="px-5 py-2.5 text-sm font-medium hover:bg-white/5 rounded-full transition-colors">
+              Sign in
+            </Link>
+            <Link href="/register" className="px-5 py-2.5 text-sm font-medium bg-white text-black hover:bg-gray-200 rounded-full transition-colors">
+              Get Started
+            </Link>
+          </div>
+          
+          {/* Mobile Toggle Button */}
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 text-gray-400 hover:text-white transition-colors z-[60]"
+          >
+            {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
         </div>
       </nav>
+
+      {/* Mobile Menu Drawer */}
+      <div className={`fixed inset-0 z-[55] md:hidden transition-transform duration-500 ease-in-out ${mobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}>
+        <div className="absolute inset-0 bg-[#020205]/95 backdrop-blur-xl flex flex-col items-center justify-center gap-10 p-8">
+          <div className="flex flex-col items-center gap-6 text-2xl font-bold tracking-tighter">
+            <Link href="#features" onClick={() => setMobileMenuOpen(false)} className="hover:text-[#6366f1] transition-colors">Features</Link>
+            <Link href="#security" onClick={() => setMobileMenuOpen(false)} className="hover:text-[#6366f1] transition-colors">Security</Link>
+            <Link href="#pricing" onClick={() => setMobileMenuOpen(false)} className="hover:text-[#6366f1] transition-colors">Pricing</Link>
+          </div>
+          
+          <div className="w-full max-w-xs h-px bg-white/10" />
+          
+          <div className="flex flex-col gap-4 w-full max-w-xs">
+            <Link href="/login" className="w-full py-4 text-center font-bold bg-white/5 border border-white/10 rounded-2xl">
+              Sign in
+            </Link>
+            <Link href="/register" className="w-full py-4 text-center font-bold bg-[#6366f1] text-white rounded-2xl shadow-[0_0_30px_rgba(99,102,241,0.3)]">
+              Open an account
+            </Link>
+          </div>
+        </div>
+      </div>
 
       {/* ─── HERO SECTION with background image ─── */}
       <section className="relative min-h-[100dvh] flex flex-col items-center justify-center text-center px-8 overflow-hidden w-full">

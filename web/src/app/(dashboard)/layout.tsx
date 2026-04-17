@@ -89,27 +89,30 @@ export default function DashboardLayout({
           <button onClick={() => setMobileMenuOpen(false)} className="p-1 text-gray-500 hover:text-white"><X size={20} /></button>
         </div>
 
-        <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1 custom-scrollbar">
-          {SIDEBAR_LINKS.map((link) => {
-            const isActive = pathname === link.path;
-            const Icon = link.icon;
-            
-            return (
-              <Link 
-                key={link.id} 
-                href={link.path}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg font-medium text-sm transition-colors ${
-                  isActive 
-                    ? "bg-[#6366f1]/10 text-white border border-[#6366f1]/20" 
-                    : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"
-                }`}
-              >
-                <Icon size={18} className={isActive ? "text-[#6366f1]" : "text-gray-500"} />
-                {link.label}
-              </Link>
-            );
-          })}
+        {/* Links Container */}
+        <div className="flex-1 overflow-y-auto py-6 px-4 custom-scrollbar">
+          <div className={`grid ${mobileMenuOpen ? "grid-cols-2 gap-3" : "grid-cols-1 space-y-1"} md:grid-cols-1 md:space-y-1`}>
+            {SIDEBAR_LINKS.map((link) => {
+              const isActive = pathname === link.path;
+              const Icon = link.icon;
+              
+              return (
+                <Link 
+                  key={link.id} 
+                  href={link.path}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`flex items-center gap-3 px-3 py-3 rounded-xl font-medium text-sm transition-all border ${
+                    isActive 
+                      ? "bg-[#6366f1]/10 text-white border-[#6366f1]/20 shadow-[0_0_15px_rgba(99,102,241,0.1)]" 
+                      : "text-gray-400 hover:text-white hover:bg-white/5 border-transparent"
+                  } ${mobileMenuOpen ? "flex-col justify-center text-center p-4 bg-white/5" : ""}`}
+                >
+                  <Icon size={mobileMenuOpen ? 24 : 18} className={isActive ? "text-[#6366f1]" : "text-gray-500"} />
+                  <span className={mobileMenuOpen ? "text-[11px]" : ""}>{link.label}</span>
+                </Link>
+              );
+            })}
+          </div>
         </div>
         
         <div className="p-4 border-t border-white/5 flex items-center justify-between">
