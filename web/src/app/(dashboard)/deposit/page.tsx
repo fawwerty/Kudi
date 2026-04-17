@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowDownLeft, CreditCard, Landmark, CheckCircle2, Shield } from "lucide-react";
+import { ArrowDownLeft, CreditCard, Landmark, CheckCircle2, Shield, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { fetchApi } from "@/lib/api";
 import { useUser } from "@/context/UserContext";
@@ -10,8 +10,9 @@ export default function DepositPage() {
   const { refreshUser } = useUser();
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState("card");
-  const [state, setState] = useState<"idle" | "loading" | "success">("idle");
+  const [state, setState] = useState<"idle" | "loading" | "success" | "redirect">("idle");
   const [error, setError] = useState("");
+  const [checkoutUrl, setCheckoutUrl] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,13 +20,21 @@ export default function DepositPage() {
     setError("");
 
     try {
-      await fetchApi("/transactions/deposit", {
+      const res = await fetchApi("/transactions/deposit", {
         method: "POST",
-        body: JSON.stringify({ amount, description: `Deposit via ${method}` })
+        body: JSON.stringify({ amount, description: `Deposit via ${method.toUpperCase()}` })
       });
-      await refreshUser();
-      setState("success");
-      setTimeout(() => {setState("idle"); setAmount("");}, 3000);
+      
+      if (res.checkoutUrl) {
+        setCheckoutUrl(res.checkoutUrl);
+        setState("redirect");
+        // Open in new tab or redirect
+        window.location.href = res.checkoutUrl;
+      } else {
+        await refreshUser();
+        setState("success");
+        setTimeout(() => {setState("idle"); setAmount("");}, 3000);
+      }
     } catch (err: any) {
       setError(err.message);
       setState("idle");
@@ -39,7 +48,21 @@ export default function DepositPage() {
         <p className="text-gray-400 text-sm">Add funds safely to your account using secure payment gateways.</p>
       </header>
 
-      {state === "success" ? (
+      {state === "redirect" ? (
+        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-card rounded-3xl p-12 text-center flex flex-col items-center">
+          <div className="w-20 h-20 bg-[#6366f1]/20 text-[#6366f1] rounded-full flex items-center justify-center mb-6 animate-pulse">
+            <ExternalLink size={40} />
+          </div>
+          <h2 className="text-2xl font-bold mb-2">Redirecting to Secure Payment</h2>
+          <p className="text-gray-400 mb-6">We are taking you to Paystack to complete your ₵{amount} deposit.</p>
+          <a 
+            href={checkoutUrl}
+            className="text-[#6366f1] font-bold hover:underline bg-[#6366f1]/10 px-6 py-3 rounded-xl"
+          >
+            Click here if you are not redirected
+          </a>
+        </motion.div>
+      ) : state === "success" ? (
         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-card rounded-3xl p-12 text-center flex flex-col items-center">
           <div className="w-20 h-20 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mb-6">
             <CheckCircle2 size={40} />
@@ -99,20 +122,10 @@ export default function DepositPage() {
                   }`}
                 >
                   <Landmark size={24} className={method === "bank" ? "text-[#6366f1]" : ""} />
-                  <span className="font-semibold text-sm">Bank Wire</span>
+                  <span className="font-semibold text-sm">Bank Transfer / MoMo</span>
                 </button>
               </div>
             </div>
-
-            {method === "card" && (
-              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-4">
-                <input type="text" placeholder="Card Number" className="w-full bg-[#050508] border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-[#6366f1] outline-none" />
-                <div className="flex gap-4">
-                  <input type="text" placeholder="MM/YY" className="w-full bg-[#050508] border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-[#6366f1] outline-none" />
-                  <input type="text" placeholder="CVC" className="w-full bg-[#050508] border border-white/10 rounded-xl px-4 py-3 text-sm focus:border-[#6366f1] outline-none" />
-                </div>
-              </motion.div>
-            )}
 
             <button 
               type="submit" 
@@ -121,16 +134,19 @@ export default function DepositPage() {
             >
               {state === "loading" ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Processing directly via API...
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                  Initializing Paystack Gateway...
                 </>
               ) : (
                 <>
-                  <ArrowDownLeft size={20} /> Complete Deposit
+                  <ArrowDownLeft size={20} /> Secure Deposit with Paystack
                 </>
               )}
             </button>
           </form>
+          <p className="text-center text-[10px] text-gray-600 mt-6 uppercase tracking-widest font-bold">
+            Secure 256-bit SSL Encryption
+          </p>
         </div>
       )}
     </motion.div>

@@ -8,6 +8,12 @@ const axios        = require("axios");
 const app  = express();
 const PORT = process.env.PORT || 5000;
 
+// Environment validation
+if (!process.env.PAYSTACK_SECRET_KEY) {
+  console.error("❌ ERROR: PAYSTACK_SECRET_KEY is missing from .env");
+  process.exit(1);
+}
+
 // Security & Middlewares
 app.use(helmet({
   contentSecurityPolicy: false, // Disable dynamic CSP which can block API calls
