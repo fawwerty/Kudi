@@ -1,5 +1,5 @@
 {
-  "name": "bankly-backend",
+  "name": "kudi-api",
   "version": "2.0.0",
   "description": "Kudi Node.js/Express backend — JWT auth, transactions, AI proxy",
   "main": "server.js",
