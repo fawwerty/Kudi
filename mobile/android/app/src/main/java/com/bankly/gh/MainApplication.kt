@@ -1,4 +1,4 @@
-package com.kudi
+package com.bankly.gh
 
 import android.app.Application
 import android.content.res.Configuration

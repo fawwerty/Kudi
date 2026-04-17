@@ -1,4 +1,4 @@
-package com.kudi
+package com.bankly.gh
 
 import android.os.Build
 import android.os.Bundle
