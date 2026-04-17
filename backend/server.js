@@ -9,9 +9,10 @@ const app  = express();
 const PORT = process.env.PORT || 5000;
 
 // Environment validation
-if (!process.env.PAYSTACK_SECRET_KEY) {
-  console.error("❌ ERROR: PAYSTACK_SECRET_KEY is missing from .env");
-  process.exit(1);
+if (!process.env.PAYSTACK_SECRET_KEY && process.env.NODE_ENV === "production") {
+  console.warn("⚠️  WARNING: PAYSTACK_SECRET_KEY is missing. Paystack integrations will NOT work.");
+} else if (!process.env.PAYSTACK_SECRET_KEY) {
+  console.warn("ℹ️  INFO: PAYSTACK_SECRET_KEY is missing from .env. Using fallback/mock for development.");
 }
 
 // Security & Middlewares

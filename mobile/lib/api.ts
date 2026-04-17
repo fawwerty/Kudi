@@ -84,10 +84,14 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}): Pro
 
   if (!response.ok) {
     let errorMsg = "API request failed";
+    let detail = "";
     try {
       const errorData = await response.json();
       errorMsg = errorData.error || errorMsg;
+      detail = JSON.stringify(errorData);
     } catch { /* ignore */ }
+    
+    console.error(`❌ API Error [${endpoint}]:`, errorMsg, detail);
     throw new Error(errorMsg);
   }
 
