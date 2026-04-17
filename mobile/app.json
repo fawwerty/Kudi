@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "kudi",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "sdkVersion": "54.0.0",
     "ios": {
       "supportsTablet": true,
@@ -33,7 +33,7 @@
         {
           "android": {
             "kotlinVersion": "2.0.21",
-            "newArchEnabled": false
+            "newArchEnabled": true
           }
         }
       ],
